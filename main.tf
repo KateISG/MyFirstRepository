@@ -1,9 +1,9 @@
 terraform {
   required_providers {
-    #docker = {
-    #source  = "kreuzwerker/docker"
-    #     version = "2.14.0"
-    #}
+ #   docker = {
+ #   source  = "kreuzwerker/docker"
+ #        version = "2.14.0"
+ #   }
     aws = {
       source  = "hashicorp/aws"
       version = "~> 3.27"
@@ -105,6 +105,11 @@ resource "aws_route_table" "Public_route" {
   }
 }
 
+resource "aws_route_table_association" "rta_subnet_public" {
+  subnet_id      = aws_subnet.public1.id
+  route_table_id = aws_route_table.Public_route.id
+}
+
 #security group
 
 resource "aws_security_group" "ssh-input" {
@@ -167,6 +172,8 @@ resource "aws_instance" "test" {
   ami                         = data.aws_ami.ubuntu.id
   instance_type               = "t3.micro"
   associate_public_ip_address = true
+  subnet_id                   = aws_subnet.public1.id
+  vpc_security_group_ids      = ["${aws_security_group.ssh-input.id}"]
   key_name                    = aws_key_pair.keyec2.key_name
  # network_interface {
  #   network_interface_id = aws_network_interface.Lab1_netw.id
